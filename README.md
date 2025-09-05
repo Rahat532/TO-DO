@@ -125,6 +125,3 @@ No license file is currently included.
 
 📸 Screenshots
 <img width="1913" height="907" alt="image" src="https://github.com/user-attachments/assets/17068a2b-5881-4023-a3c0-9b952431768e" />
-
-
-![Home](screenshots/home.png)
