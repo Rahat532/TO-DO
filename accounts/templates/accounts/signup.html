@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sign up</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900">
+  <div class="min-h-screen flex items-center justify-center p-6">
+    <div class="w-full max-w-lg bg-white rounded-2xl shadow ring-1 ring-gray-100 p-6">
+      <h1 class="text-2xl font-semibold mb-1">Create your account</h1>
+      <p class="text-gray-600 mb-6">It’s quick and easy</p>
+
+      {% if form.errors %}
+        <div class="mb-4 p-3 rounded-xl bg-amber-50 text-amber-900 ring-1 ring-amber-200 text-sm">
+          Please correct the errors below.
+        </div>
+      {% endif %}
+
+      <form method="post" class="space-y-4">
+        {% csrf_token %}
+        <div>
+          <label class="block text-sm font-medium mb-1">Username</label>
+          {{ form.username }}
+          {% if form.username.errors %}
+            <p class="text-sm text-rose-600 mt-1">{{ form.username.errors.0 }}</p>
+          {% endif %}
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Email</label>
+          {{ form.email }}
+          {% if form.email.errors %}
+            <p class="text-sm text-rose-600 mt-1">{{ form.email.errors.0 }}</p>
+          {% endif %}
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">Password</label>
+            <div class="relative">
+              {{ form.password1 }}
+              <button type="button" data-toggle-password class="absolute inset-y-0 right-0 px-3 text-gray-500">👁️</button>
+            </div>
+            {% if form.password1.errors %}
+              <p class="text-sm text-rose-600 mt-1">{{ form.password1.errors.0 }}</p>
+            {% endif %}
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Confirm password</label>
+            <div class="relative">
+              {{ form.password2 }}
+              <button type="button" data-toggle-password class="absolute inset-y-0 right-0 px-3 text-gray-500">👁️</button>
+            </div>
+            {% if form.password2.errors %}
+              <p class="text-sm text-rose-600 mt-1">{{ form.password2.errors.0 }}</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <button class="w-full px-4 py-2 rounded-xl bg-emerald-600 text-white shadow hover:bg-emerald-700">Create account</button>
+      </form>
+
+      <p class="mt-6 text-sm text-gray-600">Already have an account?
+        <a href="{% url 'accounts:login' %}" class="text-emerald-700 font-medium">Log in</a>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll('[data-toggle-password]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const input = btn.parentElement.querySelector('input');
+        input.type = input.type === 'password' ? 'text' : 'password';
+      });
+    });
+  </script>
+</body>
+</html>

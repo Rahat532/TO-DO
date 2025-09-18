@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Add User</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900">
+  <!-- Header -->
+  <div class="bg-gradient-to-r from-emerald-600 to-teal-600 text-white">
+    <div class="max-w-3xl mx-auto px-6 py-5 flex items-center justify-between">
+      <h1 class="text-xl sm:text-2xl font-semibold tracking-tight">Add User</h1>
+      <a href="{% url 'accounts:dashboard' %}" class="inline-flex items-center gap-2 rounded-xl px-4 py-2 bg-white/10 hover:bg-white/20 ring-1 ring-white/30">
+        Back
+      </a>
+    </div>
+  </div>
+
+  <main class="max-w-3xl mx-auto px-6 py-6">
+    <!-- Flash messages -->
+    {% if messages %}
+      <div class="space-y-2 mb-4">
+        {% for m in messages %}
+          <div class="p-3 rounded-xl text-sm font-medium
+               {% if 'success' in m.tags %} bg-emerald-50 text-emerald-900 ring-1 ring-emerald-200
+               {% elif 'error' in m.tags %} bg-rose-50 text-rose-900 ring-1 ring-rose-200
+               {% elif 'warning' in m.tags %} bg-amber-50 text-amber-900 ring-1 ring-amber-200
+               {% else %} bg-sky-50 text-sky-900 ring-1 ring-sky-200 {% endif %}">
+            {{ m }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <form method="post" class="bg-white rounded-2xl shadow ring-1 ring-gray-100 p-6 space-y-5">
+      {% csrf_token %}
+
+      <div>
+        <label class="block text-sm font-medium mb-1">Username</label>
+        {{ form.username }}
+        {% if form.username.errors %}
+          <p class="text-sm text-rose-600 mt-1">{{ form.username.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium mb-1">Email</label>
+        {{ form.email }}
+        {% if form.email.errors %}
+          <p class="text-sm text-rose-600 mt-1">{{ form.email.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Password</label>
+          <div class="relative">
+            {{ form.password1 }}
+            <button type="button" data-toggle-password class="absolute inset-y-0 right-0 px-3 text-gray-500">👁️</button>
+          </div>
+          {% if form.password1.errors %}
+            <p class="text-sm text-rose-600 mt-1">{{ form.password1.errors.0 }}</p>
+          {% endif %}
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Confirm password</label>
+          <div class="relative">
+            {{ form.password2 }}
+            <button type="button" data-toggle-password class="absolute inset-y-0 right-0 px-3 text-gray-500">👁️</button>
+          </div>
+          {% if form.password2.errors %}
+            <p class="text-sm text-rose-600 mt-1">{{ form.password2.errors.0 }}</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        {{ form.is_staff }}
+        <label class="text-sm">Grant staff access (can access this dashboard)</label>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <a href="{% url 'accounts:dashboard' %}" class="px-4 py-2 rounded-xl ring-1 ring-gray-200 bg-white">Cancel</a>
+        <button class="px-4 py-2 rounded-xl bg-emerald-600 text-white shadow hover:bg-emerald-700">Create</button>
+      </div>
+    </form>
+  </main>
+
+  <script>
+    // Simple password show/hide for both password inputs
+    document.querySelectorAll('[data-toggle-password]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const input = btn.parentElement.querySelector('input');
+        input.type = input.type === 'password' ? 'text' : 'password';
+      });
+    });
+  </script>
+</body>
+</html>
