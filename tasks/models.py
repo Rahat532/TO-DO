@@ -20,6 +20,8 @@ class Task(models.Model):
     due_date = models.DateTimeField(null=True, blank=True)
     priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default="medium")
     created_at = models.DateTimeField(auto_now_add=True)
+    # Timestamp of the last reminder sent for this task (helps avoid duplicate reminders)
+    last_reminder_sent = models.DateTimeField(null=True, blank=True, default=None)
 
     class Meta:
         ordering = ["-created_at"]

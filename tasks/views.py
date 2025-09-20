@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.http import JsonResponse, HttpResponseBadRequest
 from .models import Task
 from .forms import TaskForm
 
@@ -51,3 +52,40 @@ def delete_task(request, pk):
     task.delete()
     messages.success(request, "Task deleted.")
     return redirect("tasks:task_list")
+
+
+@login_required
+def delete_task_ajax(request, pk):
+    """Delete task via AJAX and return JSON. Expects POST."""
+    if request.method != 'POST':
+        return HttpResponseBadRequest('Invalid request')
+
+    task = get_object_or_404(Task, pk=pk, owner=request.user)
+    # Return task data so client can offer undo
+    data = {'id': task.pk, 'title': task.title, 'due_date': task.due_date.isoformat() if task.due_date else None, 'priority': task.priority}
+    task.delete()
+    return JsonResponse({'status': 'ok', 'task': data})
+
+
+@login_required
+def undo_create(request):
+    """Recreate a task sent by the client (used for undo). Expects POST JSON with title, due_date (ISO) and priority."""
+    if request.method != 'POST':
+        return HttpResponseBadRequest('Invalid request')
+
+    title = request.POST.get('title')
+    due = request.POST.get('due_date')
+    priority = request.POST.get('priority') or 'medium'
+    if not title:
+        return JsonResponse({'status': 'error', 'message': 'Missing title'}, status=400)
+
+    task = Task.objects.create(owner=request.user, title=title, priority=priority)
+    # parse due if provided
+    if due:
+        from django.utils.dateparse import parse_datetime
+        dt = parse_datetime(due)
+        if dt:
+            task.due_date = dt
+            task.save(update_fields=['due_date'])
+
+    return JsonResponse({'status': 'ok', 'task_id': task.pk})
