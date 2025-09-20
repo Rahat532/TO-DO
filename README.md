@@ -99,6 +99,41 @@ Use Done/Undo to toggle completion, or Delete to remove.
 
 No automated tests yet. PRs adding unit tests (e.g., pytest/pytest-django) are welcome.
 
+## Recent fixes & developer notes
+
+- Flash messages: templates now render only the latest flash message (so users see one clear alert such as "Task added." or "Welcome back, <username>!"). Alerts are dismissible and auto-hide after a few seconds. If you want a shared include for this snippet I can extract it to `templates/includes/messages.html`.
+
+- Login welcome message: a friendly "Welcome back, <username>!" message is added on successful login by `RoleAwareLoginView`.
+
+- Profile header: profile pages (detail + edit) display a Home link in the header that routes admins to `accounts:dashboard` and regular users to `tasks:task_list`.
+
+- Message rendering bug fixed: templates previously used `messages|last` which caused a TypeError with Django's message storage; they now use a safe `for m in messages` loop and render only the final item.
+
+## How to test the message flows
+
+1. Start the development server
+
+```bash
+python manage.py runserver
+```
+
+2. Sign up a new user (or use existing user) and log in. You should see a welcome message on the first redirect:
+
+- Admins: redirected to `accounts:dashboard` with a "Welcome back, <username>!" alert.
+- Regular users: redirected to the task list with the same welcome alert.
+
+3. Create a task from the task list. You should see a single "Task added." message that disappears after ~5s (or when dismissed).
+
+4. Delete a task: you should see "Task deleted." as a single alert.
+
+If you observe multiple stacked alerts or a lingering message across pages, restart the server and try again — the message storage should be consumed after rendering the template.
+
+## Dev checklist / next steps
+
+- Consider extracting the flash-message HTML/JS into a shared include for DRYness.
+- Add tests for message flows and for-permissions on task operations (task creation/update/delete must be owner-only).
+- Add brief CONTRIBUTING.md and LICENSE if this project will be shared publicly.
+
 📦 Deployment Tips
 
 Minimal static handling needed since Tailwind is loaded via CDN.
