@@ -1,0 +1,4 @@
+Django>=4.2,<6
+tzdata; platform_system=="Windows"
+Pillow>=10.0  # for avatar uploads
+whitenoise>=6.7

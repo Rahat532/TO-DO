@@ -65,6 +65,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'accounts.context_processors.ensure_profile',
             ],
         },
     },
@@ -124,8 +125,24 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-# settings.py
 LOGIN_URL = "accounts:login"
 LOGIN_REDIRECT_URL = "/"        # after login
 LOGOUT_REDIRECT_URL = "accounts:login"  # after logout
-LOGOUT_REDIRECT_URL = "accounts:login" 
+
+# Consolidated INSTALLED_APPS (include Django contrib apps and project apps)
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'django.contrib.humanize',
+    'widget_tweaks',
+    'accounts',
+    'tasks',
+]
+
+# User uploads (e.g., avatar)
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"  # from pathlib import Path; BASE_DIR = Path(__file__).resolve().parent.parent

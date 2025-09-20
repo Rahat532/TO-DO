@@ -5,96 +5,223 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Add User</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ["Inter", "ui-sans-serif", "system-ui", "-apple-system", "Segoe UI", "Roboto", "Helvetica", "Arial", "Noto Sans"],
+          },
+          boxShadow: {
+            soft: "0 1px 2px 0 rgb(0 0 0 / 0.05), 0 1px 3px 0 rgb(0 0 0 / 0.1)",
+          },
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Ensure un-classed Django widgets still look nice */
+    form input[type="text"],
+    form input[type="email"],
+    form input[type="password"],
+    form select,
+    form textarea {
+      width: 100%; border-radius: 0.75rem; border: 1px solid rgb(209 213 219);
+      padding: 0.5rem 0.75rem; outline: none; background-color: white;
+    }
+    form input:focus, form select:focus, form textarea:focus {
+      box-shadow: 0 0 0 3px rgb(16 185 129 / 0.3); border-color: rgb(16 185 129);
+    }
+  </style>
 </head>
-<body class="bg-gray-50 text-gray-900">
+<body class="bg-gray-50 text-gray-900 antialiased min-h-screen flex flex-col">
   <!-- Header -->
-  <div class="bg-gradient-to-r from-emerald-600 to-teal-600 text-white">
-    <div class="max-w-3xl mx-auto px-6 py-5 flex items-center justify-between">
-      <h1 class="text-xl sm:text-2xl font-semibold tracking-tight">Add User</h1>
-      <a href="{% url 'accounts:dashboard' %}" class="inline-flex items-center gap-2 rounded-xl px-4 py-2 bg-white/10 hover:bg-white/20 ring-1 ring-white/30">
-        Back
-      </a>
-    </div>
-  </div>
-
-  <main class="max-w-3xl mx-auto px-6 py-6">
-    <!-- Flash messages -->
-    {% if messages %}
-      <div class="space-y-2 mb-4">
-        {% for m in messages %}
-          <div class="p-3 rounded-xl text-sm font-medium
-               {% if 'success' in m.tags %} bg-emerald-50 text-emerald-900 ring-1 ring-emerald-200
-               {% elif 'error' in m.tags %} bg-rose-50 text-rose-900 ring-1 ring-rose-200
-               {% elif 'warning' in m.tags %} bg-amber-50 text-amber-900 ring-1 ring-amber-200
-               {% else %} bg-sky-50 text-sky-900 ring-1 ring-sky-200 {% endif %}">
-            {{ m }}
+  <header class="bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-soft">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 py-4">
+      <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <a href="{% url 'accounts:dashboard' %}" class="inline-flex items-center justify-center h-9 w-9 rounded-lg bg-white/10 hover:bg-white/20 ring-1 ring-white/30" aria-label="Back to dashboard">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+          </a>
+          <div>
+            <p class="text-xs/5 opacity-80">Admin</p>
+            <h1 class="text-lg sm:text-2xl font-semibold tracking-tight">Add User</h1>
           </div>
-        {% endfor %}
+        </div>
+        <div class="flex items-center gap-2">
+          <a href="{% url 'accounts:create_user' %}" class="hidden sm:inline-flex items-center gap-2 rounded-xl px-3.5 py-2 bg-white/10 hover:bg-white/20 ring-1 ring-white/30">New form</a>
+          <form method="post" action="{% url 'accounts:logout' %}" class="hidden sm:block">
+            {% csrf_token %}
+            <button type="submit" class="inline-flex items-center gap-2 rounded-xl px-3.5 py-2 bg-white text-gray-900 hover:bg-amber-300 ring-1 ring-white/30 shadow-soft">Logout</button>
+          </form>
+        </div>
       </div>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-4xl mx-auto px-4 sm:px-6 py-6 w-full">
+    <!-- Flash messages (only show the most recent) -->
+    {% if messages %}
+      <section aria-live="polite" class="space-y-2 mb-4" id="messages">
+        {% for m in messages %}
+          {% if forloop.last %}
+            <div class="p-3 rounded-xl text-sm font-medium ring-1 flex items-start gap-2
+                 {% if 'success' in m.tags %} bg-emerald-50 text-emerald-900 ring-emerald-200
+                 {% elif 'error' in m.tags %} bg-rose-50 text-rose-900 ring-rose-200
+                 {% elif 'warning' in m.tags %} bg-amber-50 text-amber-900 ring-amber-200
+                 {% else %} bg-sky-50 text-sky-900 ring-sky-200 {% endif %} message-item">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 19a7 7 0 110-14 7 7 0 010 14z"/></svg>
+              <p>{{ m }}</p>
+              <button type="button" class="ml-auto text-sm text-gray-600 close-message" aria-label="Dismiss message">&times;</button>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </section>
     {% endif %}
 
-    <form method="post" class="bg-white rounded-2xl shadow ring-1 ring-gray-100 p-6 space-y-5">
+    <form method="post" class="bg-white rounded-2xl shadow-soft ring-1 ring-gray-100 p-6 sm:p-8 space-y-6" novalidate>
       {% csrf_token %}
 
-      <div>
-        <label class="block text-sm font-medium mb-1">Username</label>
-        {{ form.username }}
-        {% if form.username.errors %}
-          <p class="text-sm text-rose-600 mt-1">{{ form.username.errors.0 }}</p>
-        {% endif %}
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium mb-1">Email</label>
-        {{ form.email }}
-        {% if form.email.errors %}
-          <p class="text-sm text-rose-600 mt-1">{{ form.email.errors.0 }}</p>
-        {% endif %}
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm font-medium mb-1">Password</label>
-          <div class="relative">
-            {{ form.password1 }}
-            <button type="button" data-toggle-password class="absolute inset-y-0 right-0 px-3 text-gray-500">👁️</button>
-          </div>
-          {% if form.password1.errors %}
-            <p class="text-sm text-rose-600 mt-1">{{ form.password1.errors.0 }}</p>
-          {% endif %}
+      {% if form.non_field_errors %}
+        <div class="p-3 rounded-xl text-sm font-medium bg-rose-50 text-rose-900 ring-1 ring-rose-200">
+          {{ form.non_field_errors }}
         </div>
-        <div>
-          <label class="block text-sm font-medium mb-1">Confirm password</label>
-          <div class="relative">
-            {{ form.password2 }}
-            <button type="button" data-toggle-password class="absolute inset-y-0 right-0 px-3 text-gray-500">👁️</button>
-          </div>
-          {% if form.password2.errors %}
-            <p class="text-sm text-rose-600 mt-1">{{ form.password2.errors.0 }}</p>
-          {% endif %}
-        </div>
-      </div>
+      {% endif %}
 
-      <div class="flex items-center gap-2">
-        {{ form.is_staff }}
-        <label class="text-sm">Grant staff access (can access this dashboard)</label>
-      </div>
+      <fieldset class="space-y-5">
+        <legend class="text-sm font-semibold text-gray-800">Account</legend>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-1" for="{{ form.username.id_for_label }}">Username</label>
+            {{ form.username }}
+            {% if form.username.errors %}
+              <p class="text-sm text-rose-600 mt-1">{{ form.username.errors.0 }}</p>
+            {% endif %}
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1" for="{{ form.email.id_for_label }}">Email</label>
+            {{ form.email }}
+            {% if form.email.errors %}
+              <p class="text-sm text-rose-600 mt-1">{{ form.email.errors.0 }}</p>
+            {% endif %}
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="space-y-5">
+        <legend class="text-sm font-semibold text-gray-800">Security</legend>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-1" for="{{ form.password1.id_for_label }}">Password</label>
+            <div class="relative">
+              {{ form.password1 }}
+              <button type="button" data-toggle-password class="absolute inset-y-0 right-0 px-3 text-gray-500" aria-label="Toggle password">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+              </button>
+            </div>
+            {% if form.password1.errors %}
+              <p class="text-sm text-rose-600 mt-1">{{ form.password1.errors.0 }}</p>
+            {% endif %}
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1" for="{{ form.password2.id_for_label }}">Confirm password</label>
+            <div class="relative">
+              {{ form.password2 }}
+              <button type="button" data-toggle-password class="absolute inset-y-0 right-0 px-3 text-gray-500" aria-label="Toggle password">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+              </button>
+            </div>
+            {% if form.password2.errors %}
+              <p class="text-sm text-rose-600 mt-1">{{ form.password2.errors.0 }}</p>
+            {% endif %}
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="space-y-5">
+        <legend class="text-sm font-semibold text-gray-800">Permissions</legend>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-1" for="{{ form.group.id_for_label }}">Group</label>
+            {{ form.group }}
+            {% if form.group.errors %}
+              <p class="text-sm text-rose-600 mt-1">{{ form.group.errors.0 }}</p>
+            {% endif %}
+          </div>
+          <div class="sm:pt-6">
+            <div class="flex items-start gap-2">
+              {{ form.is_staff }}
+              <label for="{{ form.is_staff.id_for_label }}" class="text-sm leading-6">
+                Grant staff access (can access this dashboard)
+                {% if form.is_staff.help_text %}
+                  <span class="block text-xs text-gray-500">{{ form.is_staff.help_text }}</span>
+                {% endif %}
+              </label>
+            </div>
+            {% if form.is_staff.errors %}
+              <p class="text-sm text-rose-600 mt-1">{{ form.is_staff.errors.0 }}</p>
+            {% endif %}
+          </div>
+        </div>
+      </fieldset>
 
       <div class="flex items-center justify-end gap-2 pt-2">
-        <a href="{% url 'accounts:dashboard' %}" class="px-4 py-2 rounded-xl ring-1 ring-gray-200 bg-white">Cancel</a>
-        <button class="px-4 py-2 rounded-xl bg-emerald-600 text-white shadow hover:bg-emerald-700">Create</button>
+        <a href="{% url 'accounts:dashboard' %}" class="px-4 py-2 rounded-xl ring-1 ring-gray-200 bg-white hover:bg-gray-50">Cancel</a>
+        <button class="px-4 py-2 rounded-xl bg-emerald-600 text-white shadow-soft hover:bg-emerald-700">Create</button>
       </div>
     </form>
   </main>
 
+  <!-- Footer -->
+  <footer class="mt-10">
+    <div class="h-1 w-full bg-gradient-to-r from-fuchsia-500 via-amber-400 to-emerald-500"></div>
+    <div class="bg-gradient-to-r from-indigo-600 via-fuchsia-600 to-emerald-600 text-white">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 py-8 text-sm">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p class="opacity-90">&copy; {% now "Y" %} <span class="font-semibold">ToDo</span>. All rights reserved.</p>
+          <nav class="flex items-center gap-3 flex-wrap">
+            <a href="{% url 'accounts:home' %}" class="inline-flex items-center gap-2 rounded-xl px-3 py-1.5 bg-white/15 hover:bg-white/25 ring-1 ring-white/30 transition">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M4 10v10a2 2 0 002 2h4m8-12v10a2 2 0 01-2 2h-4"/></svg>
+              Home
+            </a>
+            <a href="{% url 'accounts:dashboard' %}" class="inline-flex items-center gap-2 rounded-xl px-3 py-1.5 bg-white/15 hover:bg-white/25 ring-1 ring-white/30 transition">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 22s8-4 8-10V6l-8-4-8 4v6c0 6 8 10 8 10z"/></svg>
+              Admin
+            </a>
+            <form method="post" action="{% url 'accounts:logout' %}" class="inline">
+              {% csrf_token %}
+              <button type="submit" class="inline-flex items-center gap-2 rounded-xl px-3 py-1.5 bg-white text-gray-900 hover:bg-amber-300 hover:text-gray-900 shadow-sm transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12H3m12 0l-4-4m4 4l-4 4M21 4v16"/></svg>
+                Logout
+              </button>
+            </form>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </footer>
+
   <script>
-    // Simple password show/hide for both password inputs
+    // Toggle password visibility for both controls
     document.querySelectorAll('[data-toggle-password]').forEach(btn => {
       btn.addEventListener('click', () => {
         const input = btn.parentElement.querySelector('input');
+        if (!input) return;
         input.type = input.type === 'password' ? 'text' : 'password';
       });
     });
-  </script>
+    </script>
+    <script>
+      (function(){
+        var container = document.getElementById('messages');
+        if (!container) return;
+        var items = container.querySelectorAll('.message-item');
+        items.forEach(function(el){
+          var timer = setTimeout(function(){ el.style.transition = 'opacity 250ms ease-out'; el.style.opacity = '0'; setTimeout(function(){ try{ el.remove(); }catch(e){} }, 300); }, 5000);
+          var btn = el.querySelector('.close-message');
+          if (btn){ btn.addEventListener('click', function(){ clearTimeout(timer); el.style.transition = 'opacity 200ms ease-out'; el.style.opacity = '0'; setTimeout(function(){ try{ el.remove(); }catch(e){} }, 220); }); }
+        });
+      })();
+    </script>
 </body>
 </html>

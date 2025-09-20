@@ -1,164 +1,120 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <title>Todo App</title>
+    <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>My Tasks</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    {% load widget_tweaks %}
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col">
 
-    <!-- Header -->
-    <header class="w-full bg-[#328E6E] text-white shadow">
-  <div class="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
-    <!-- Left: brand -->
-    <div class="flex items-center gap-3">
-      <span class="text-2xl">📝</span>
-      <span class="text-xl font-semibold tracking-wide">To-do Lists</span>
-    </div>
-
-    <!-- Right: tagline + logout -->
-    <div class="flex items-center gap-4">
-      <div class="hidden md:block text-sm opacity-90">
-        <span>Stay organized, stay calm 😌</span>
+  <header class="w-full bg-[#328E6E] text-white shadow">
+    <div class="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="text-2xl">📝</span>
+        <span class="text-xl font-semibold">To-do</span>
       </div>
 
-      {% if user.is_authenticated %}
-      <form method="post" action="{% url 'accounts:logout' %}">
-        {% csrf_token %}
-        <button type="submit"
-                class="inline-flex items-center gap-2 rounded-xl px-4 py-2 bg-white/10 hover:bg-white/20 ring-1 ring-white/30">
-          Logout
-        </button>
-      </form>
-      {% endif %}
+      <div class="flex items-center gap-4">
+        {% if user.is_authenticated %}
+          <a href="{% url 'accounts:profile' %}" class="flex items-center gap-3 text-sm">
+            {% if profile and profile.avatar %}
+              <img src="{{ profile.avatar.url }}" alt="{{ user.username }}'s avatar" class="h-8 w-8 rounded-full object-cover" />
+            {% else %}
+              <div class="h-8 w-8 rounded-full bg-white/10 grid place-items-center text-white font-semibold">{{ user.username|slice:":1"|upper }}</div>
+            {% endif %}
+            <span class="hidden sm:inline">{{ user.username }}</span>
+          </a>
+          <form method="post" action="{% url 'accounts:logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="ml-2 rounded px-3 py-1 bg-white/10">Logout</button>
+          </form>
+        {% else %}
+          <a href="{% url 'accounts:login' %}" class="text-sm">Log in</a>
+        {% endif %}
+      </div>
     </div>
-  </div>
-</header>
+  </header>
 
+  <main class="flex-1 w-full">
+    <div class="max-w-4xl mx-auto px-6 py-8">
+      <div class="bg-white shadow-lg rounded-xl p-6 w-full">
+        <h1 class="text-2xl font-bold text-[#328E6E] mb-4">My Todo List</h1>
+        <!-- Flash messages (show latest only) -->
+        {% if messages %}
+          <section aria-live="polite" class="mb-4" id="messages">
+            {% for m in messages %}
+              {% if forloop.last %}
+                <div class="p-3 rounded-xl text-sm font-medium ring-1 flex items-start gap-2 {% if 'success' in m.tags %} bg-emerald-50 text-emerald-900 ring-emerald-200{% elif 'error' in m.tags %} bg-rose-50 text-rose-900 ring-rose-200{% elif 'warning' in m.tags %} bg-amber-50 text-amber-900 ring-amber-200{% else %} bg-sky-50 text-sky-900 ring-sky-200{% endif %} message-item">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mt-0.5 flex-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 19a7 7 0 110-14 7 7 0 010 14z"/></svg>
+                  <p class="ml-2">{{ m }}</p>
+                  <button type="button" class="ml-auto text-sm text-gray-600 close-message" aria-label="Dismiss message">&times;</button>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </section>
+        {% endif %}
 
-    <!-- Main -->
-    <main class="flex-1 w-full">
-        <div class="max-w-4xl mx-auto px-6 py-8">
-            <div class="bg-white shadow-lg rounded-xl p-6 w-full">
-                <h1 class="text-2xl font-bold text-[#328E6E] mb-4">My Todo List</h1>
+        <form method="post" class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-6">
+          {% csrf_token %}
+          {{ form.title|add_class:"border rounded-lg px-3 py-2 md:col-span-2" }}
+          {{ form.due_date|add_class:"border rounded-lg px-3 py-2 md:col-span-1" }}
+          {{ form.priority|add_class:"border rounded-lg px-3 py-2 md:col-span-1" }}
+          <button type="submit" class="md:col-span-4 bg-[#67AE6E] text-white px-4 py-2 rounded-lg">Add Task</button>
+        </form>
 
-                <!-- Add Task Form -->
-                <form method="post" class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-6">
+        <ul class="space-y-4">
+          {% for task in tasks %}
+            <li class="rounded-xl shadow border overflow-hidden {% if task.completed %}bg-[#E1EEBC]{% else %}bg-white{% endif %}">
+              <div class="h-1 w-full {% if task.priority == 'high' %}bg-[#328E6E]{% elif task.priority == 'medium' %}bg-[#67AE6E]{% else %}bg-[#90C67C]{% endif %}"></div>
+              <div class="p-4 flex justify-between items-center">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="{% if task.completed %}line-through text-gray-500{% endif %} font-medium">{{ task.title }}</span>
+                    <span class="ml-2 text-xs px-2 py-1 rounded-full {% if task.priority == 'high' %}bg-[#328E6E] text-white{% elif task.priority == 'medium' %}bg-[#67AE6E] text-white{% else %}bg-[#90C67C] text-white{% endif %}">{{ task.priority|title }}</span>
+                    {% if task.completed %}<span class="ml-1 text-xs px-2 py-0.5 rounded-full bg-white/70 text-[#328E6E] border">Completed</span>{% endif %}
+                  </div>
+                  {% if task.due_date %}<div class="text-sm text-gray-500 mt-1">Due: {{ task.due_date|date:"M d, Y H:i" }}</div>{% endif %}
+                </div>
+
+                <div class="flex gap-2">
+                  <form method="post" action="{% url 'tasks:toggle_task' task.pk %}">
                     {% csrf_token %}
-                    <input
-                        type="text"
-                        name="title"
-                        placeholder="Enter a task..."
-                        class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#90C67C] md:col-span-2"
-                    />
+                    <button type="submit" class="px-3 py-1 rounded-lg text-white {% if task.completed %}bg-[#90C67C] hover:bg-[#67AE6E]{% else %}bg-[#67AE6E] hover:bg-[#328E6E]{% endif %}">{% if task.completed %}Undo{% else %}Done{% endif %}</button>
+                  </form>
 
-                    <input
-                        type="datetime-local"
-                        name="due_date"
-                        class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#90C67C] md:col-span-1"
-                    />
+                  <form method="post" action="{% url 'tasks:delete_task' task.pk %}" onsubmit="return confirm('Delete this task?');">
+                    {% csrf_token %}
+                    <button type="submit" class="px-3 py-1 rounded-lg bg-red-500 text-white hover:bg-red-600">Delete</button>
+                  </form>
+                </div>
+              </div>
+            </li>
+          {% empty %}
+            <li class="rounded-xl border bg-white p-6 text-center text-gray-500">No tasks yet!</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </main>
 
-                    <select
-                        name="priority"
-                        class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#90C67C] md:col-span-1"
-                    >
-                        <option value="high">🔥 High</option>
-                        <option value="medium" selected>⚡ Medium</option>
-                        <option value="low">🌱 Low</option>
-                    </select>
-
-                    <button
-                        type="submit"
-                        class="bg-[#67AE6E] text-white px-4 py-2 rounded-lg hover:bg-[#328E6E] transition md:col-span-4"
-                    >
-                        Add Task
-                    </button>
-                </form>
-
-                <!-- Task List -->
-                <ul class="space-y-4">
-                    {% for task in tasks %}
-                        <li class="rounded-xl shadow border overflow-hidden
-                                   {% if task.completed %} bg-[#E1EEBC] {% else %} bg-white {% endif %}">
-                            <!-- Accent bar using palette -->
-                            <div class="h-1 w-full
-                                {% if task.priority == 'high' %} bg-[#328E6E]
-                                {% elif task.priority == 'medium' %} bg-[#67AE6E]
-                                {% else %} bg-[#90C67C] {% endif %}">
-                            </div>
-
-                            <div class="p-4 flex justify-between items-center">
-                                <div class="min-w-0">
-                                    <div class="flex items-center gap-2 flex-wrap">
-                                        <span class="{% if task.completed %}line-through text-gray-500{% endif %} font-medium truncate">
-                                            {{ task.title }}
-                                        </span>
-
-                                        <!-- Priority badge -->
-                                        <span class="ml-1 px-2 py-1 text-xs rounded-full font-semibold
-                                            {% if task.priority == 'high' %} bg-[#328E6E] text-white
-                                            {% elif task.priority == 'medium' %} bg-[#67AE6E] text-white
-                                            {% else %} bg-[#90C67C] text-white {% endif %}">
-                                            {{ task.priority|title }}
-                                        </span>
-
-                                        {% if task.completed %}
-                                            <span class="ml-1 px-2 py-0.5 text-[11px] rounded-full bg-white/70 text-[#328E6E] border">
-                                                Completed
-                                            </span>
-                                        {% endif %}
-                                    </div>
-
-                                    {% if task.due_date %}
-                                        <div class="text-sm text-gray-500 mt-1">
-                                            Due: {{ task.due_date|date:"M d, Y H:i" }}
-                                        </div>
-                                    {% endif %}
-                                </div>
-
-                                <div class="flex gap-2 shrink-0">
-                                    <a
-                                        href="{% url 'toggle_task' task.id %}"
-                                        class="px-3 py-1 rounded-lg text-white transition
-                                               {% if task.completed %}
-                                                    bg-[#90C67C] hover:bg-[#67AE6E]
-                                               {% else %}
-                                                    bg-[#67AE6E] hover:bg-[#328E6E]
-                                               {% endif %}">
-                                        {% if task.completed %}Undo{% else %}Done{% endif %}
-                                    </a>
-                                    <a
-                                        href="{% url 'delete_task' task.id %}"
-                                        class="px-3 py-1 rounded-lg bg-red-500 text-white hover:bg-red-600 transition"
-                                    >
-                                        Delete
-                                    </a>
-                                </div>
-                            </div>
-                        </li>
-                    {% empty %}
-                        <li class="rounded-xl border bg-white p-6 text-center text-gray-500">
-                            No tasks yet!
-                        </li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
-    </main>
-
-    <!-- Footer -->
-    <footer class="w-full border-t bg-white">
-        <div class="max-w-4xl mx-auto px-6 py-4 text-sm text-gray-600 flex items-center justify-between">
-            <span>© {% now "Y" %} Abdullah al Rahat</span>
-            <span class="inline-flex items-center gap-2">
-                <span class="w-3 h-3 rounded-full bg-[#328E6E]"></span>
-                <span class="w-3 h-3 rounded-full bg-[#67AE6E]"></span>
-                <span class="w-3 h-3 rounded-full bg-[#90C67C]"></span>
-                <span class="w-3 h-3 rounded-full bg-[#E1EEBC] border"></span>
-            </span>
-        </div>
-    </footer>
-
+  <footer class="w-full border-t bg-white">
+    <div class="max-w-4xl mx-auto px-6 py-4 text-sm text-gray-600 flex items-center justify-between">
+      <span>© {% now "Y" %} ToDo</span>
+    </div>
+  </footer>
+  <script>
+    (function(){
+      var container = document.getElementById('messages');
+      if (!container) return;
+      var items = container.querySelectorAll('.message-item');
+      items.forEach(function(el){
+        var timer = setTimeout(function(){ el.style.transition = 'opacity 250ms ease-out'; el.style.opacity = '0'; setTimeout(function(){ try{ el.remove(); }catch(e){} }, 300); }, 5000);
+        var btn = el.querySelector('.close-message');
+        if (btn){ btn.addEventListener('click', function(){ clearTimeout(timer); el.style.transition = 'opacity 200ms ease-out'; el.style.opacity = '0'; setTimeout(function(){ try{ el.remove(); }catch(e){} }, 220); }); }
+      });
+    })();
+  </script>
 </body>
 </html>
