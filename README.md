@@ -159,4 +159,22 @@ Use descriptive PR titles and screenshots for UI changes
 No license file is currently included.
 
 📸 Screenshots
-<img width="1913" height="907" alt="image" src="https://github.com/user-attachments/assets/17068a2b-5881-4023-a3c0-9b952431768e" />
+FOR ADMIN
+<img width="1918" height="916" alt="image" src="https://github.com/user-attachments/assets/941d20c1-100d-48a9-a8c0-ef19d7955a08" />
+<img width="1917" height="908" alt="image" src="https://github.com/user-attachments/assets/4aed8bfd-52cd-4908-b40c-9e1ce4c9615f" />
+<img width="1918" height="732" alt="image" src="https://github.com/user-attachments/assets/419c76b6-5301-4d3e-81e1-cd6c90bd0e21" />
+<img width="1918" height="825" alt="image" src="https://github.com/user-attachments/assets/13dac825-0567-4aa4-b18f-c074b4610e20" />
+<img width="1906" height="888" alt="image" src="https://github.com/user-attachments/assets/91e3a34e-61ab-45f8-8efe-438c431ad0ae" />
+<img width="1671" height="788" alt="image" src="https://github.com/user-attachments/assets/bdbc40de-ddd9-45e5-9e1c-1e0a49acae90" />
+<img width="1917" height="807" alt="image" src="https://github.com/user-attachments/assets/aa255abe-5385-48af-8f6f-16852846a82b" />
+<img width="1918" height="796" alt="image" src="https://github.com/user-attachments/assets/d365fd4a-7f4f-41a9-b00d-6ccab5605883" />
+<img width="1916" height="853" alt="image" src="https://github.com/user-attachments/assets/e86dacb0-7c74-465a-97fe-c578edfb2eb3" />
+
+
+
+
+
+
+
+
+
